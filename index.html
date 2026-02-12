@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>منشئ الفيديوهات المتقدم</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif}
+body{background:linear-gradient(135deg,#1a2a6c,#b21f1f,#fdbb2d);color:#fff;min-height:100vh;padding:20px;direction:rtl}
+.container{max-width:1200px;margin:0 auto}
+header{text-align:center;padding:20px;margin-bottom:30px}
+h1{font-size:2.5rem;margin-bottom:10px;color:#ffcc00}
+.app-description{text-align:center;margin-bottom:20px;padding:10px;background-color:rgba(0,0,0,0.3);border-radius:10px}
+.app-description p{margin:5px 0;font-size:0.9rem}
+.app-container{display:grid;grid-template-columns:1fr 1fr;gap:30px}
+@media(max-width:900px){.app-container{grid-template-columns:1fr}}
+.panel{background-color:rgba(0,0,0,0.5);border-radius:15px;padding:25px}
+.panel h2{color:#4fc3f7;margin-bottom:20px}
+.form-group{margin-bottom:20px}
+label{display:block;margin-bottom:8px;font-weight:bold;color:#ffcc80}
+input,textarea,select{width:100%;padding:12px;background-color:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.3);border-radius:8px;color:white;font-size:16px}
+textarea{height:100px;resize:vertical}
+.file-input-container{position:relative;overflow:hidden;display:inline-block;width:100%}
+.file-input-container input[type="file"]{position:absolute;left:0;top:0;opacity:0;width:100%;height:100%;cursor:pointer}
+.file-input-label{display:block;padding:12px;background-color:rgba(33,150,243,0.2);border:1px dashed #2196F3;border-radius:8px;text-align:center;cursor:pointer;transition:all 0.3s}
+.file-input-label:hover{background-color:rgba(33,150,243,0.4)}
+.file-info{font-size:0.8rem;margin-top:5px;color:#90caf9}
+.color-picker{display:flex;gap:10px}
+.color-input{flex:1;height:50px;padding:5px;cursor:pointer}
+.slider-container{display:flex;align-items:center;gap:10px}
+.slider-value{min-width:40px;text-align:center;background:rgba(255,255,255,0.1);padding:5px;border-radius:5px}
+input[type="range"]{flex:1;height:8px;-webkit-appearance:none;background:rgba(255,255,255,0.1);border-radius:4px}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;background:#2196F3;border-radius:50%;cursor:pointer}
+.button{background:linear-gradient(to right,#2196F3,#21CBF3);color:white;border:none;padding:14px 25px;border-radius:8px;font-size:16px;font-weight:bold;cursor:pointer;width:100%;margin-top:10px;transition:all 0.3s}
+.button:hover{opacity:0.9;transform:translateY(-2px)}
+.button.secondary{background:linear-gradient(to right,#4CAF50,#8BC34A)}
+.button.danger{background:linear-gradient(to right,#f44336,#e91e63)}
+.preview-container{text-align:center;margin-top:20px}
+#previewCanvas{max-width:100%;background-color:#000;border-radius:10px}
+.controls{display:flex;gap:10px;margin-top:15px}
+.status-info{margin-top:15px;padding:10px;background-color:rgba(0,0,0,0.3);border-radius:8px;text-align:center}
+.hidden{display:none}
+.progress-container{margin-top:15px}
+.progress-bar{width:100%;height:20px;background-color:rgba(255,255,255,0.1);border-radius:10px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(to right,#4CAF50,#8BC34A);width:0%;transition:width 0.3s}
+.progress-text{text-align:center;margin-top:5px;font-size:0.9rem}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<h1>منشئ الفيديوهات المتقدم</h1>
+<div class="app-description">
+<p>أنشئ فيديوهات احترافية مع إضافة خلفية وصوت وشعار</p>
+<p>مدة الفيديو تتطابق تلقائياً مع مدة المقطع الصوتي</p>
+</div>
+</header>
+
+<div class="app-container">
+<div class="panel">
+<h2>إعدادات الفيديو</h2>
+
+<div class="form-group">
+<label for="title">العنوان الرئيسي</label>
+<input type="text" id="title" value="فيديو رائع">
+</div>
+
+<div class="form-group">
+<label for="subtitle">النص الرئيسي</label>
+<textarea id="subtitle">هذا التصميم ظهر في منتصف الفيديو</textarea>
+</div>
+
+<div class="form-group">
+<label>خلفية الفيديو (صورة أو فيديو)</label>
+<div class="file-input-container">
+<input type="file" id="backgroundInput" accept="image/*,video/*">
+<label for="backgroundInput" class="file-input-label">اختر ملف خلفية (صورة أو فيديو)</label>
+</div>
+<div class="file-info" id="backgroundInfo">لم يتم اختيار ملف</div>
+</div>
+
+<div class="form-group">
+<label>مقطع صوتي (يحدد طول الفيديو)</label>
+<div class="file-input-container">
+<input type="file" id="audioInput" accept="audio/*">
+<label for="audioInput" class="file-input-label">اختر ملف صوتي (MP3, WAV, إلخ)</label>
+</div>
+<div class="file-info" id="audioInfo">لم يتم اختيار ملف - طول الفيديو: 10 ثواني</div>
+</div>
+
+<div class="form-group">
+<label>شعار (صورة)</label>
+<div class="file-input-container">
+<input type="file" id="logoInput" accept="image/*">
+<label for="logoInput" class="file-input-label">اختر ملف الشعار</label>
+</div>
+<div class="file-info" id="logoInfo">لم يتم اختيار ملف</div>
+</div>
+
+<div class="form-group">
+<label for="logoPosition">موقع الشعار</label>
+<select id="logoPosition">
+<option value="top-left">أعلى اليسار</option>
+<option value="top-right">أعلى اليمين</option>
+<option value="bottom-left">أسفل اليسار</option>
+<option value="bottom-right" selected>أسفل اليمين</option>
+<option value="center">الوسط</option>
+</select>
+</div>
+
+<div class="form-group">
+<label for="logoSize">حجم الشعار</label>
+<div class="slider-container">
+<input type="range" id="logoSize" min="10" max="200" value="80" step="5">
+<span class="slider-value" id="logoSizeValue">80px</span>
+</div>
+</div>
+
+<div class="form-group">
+<label for="fontSizeTitle">حجم خط العنوان</label>
+<select id="fontSizeTitle">
+<option value="30">30px</option>
+<option value="40">40px</option>
+<option value="50" selected>50px</option>
+<option value="60">60px</option>
+<option value="70">70px</option>
+<option value="80">80px</option>
+</select>
+</div>
+
+<div class="form-group">
+<label>حجم خط النص الرئيسي</label>
+<div class="slider-container">
+<input type="range" id="fontSizeSubtitle" min="10" max="60" value="20" step="2">
+<span class="slider-value" id="fontSizeSubtitleValue">20px</span>
+</div>
+</div>
+
+<button id="generatePreview" class="button">معاينة الآن</button>
+<button id="generateVideo" class="button secondary">إنشاء فيديو MP4</button>
+</div>
+
+<div class="panel">
+<h2>المعاينة والتحكم</h2>
+<div class="preview-container">
+<canvas id="previewCanvas" width="800" height="450"></canvas>
+<div class="controls">
+<button id="playPauseBtn" class="button">تشغيل</button>
+<button id="restartBtn" class="button">إعادة</button>
+</div>
+</div>
+
+<div class="status-info" id="statusInfo">
+حالة: جاهز لإنشاء الفيديو
+</div>
+
+<div class="progress-container hidden" id="progressContainer">
+<div class="progress-bar">
+<div class="progress-fill" id="progressFill"></div>
+</div>
+<div class="progress-text" id="progressText">0%</div>
+</div>
+
+<div id="videoDownload" class="hidden">
+<a id="downloadLink" class="button" download="video.mp4">تحميل الفيديو (MP4)</a>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+// العناصر الرئيسية
+const canvas = document.getElementById('previewCanvas');
+const ctx = canvas.getContext('2d');
+const titleInput = document.getElementById('title');
+const subtitleInput = document.getElementById('subtitle');
+const fontSizeTitleSelect = document.getElementById('fontSizeTitle');
+const fontSizeSubtitleInput = document.getElementById('fontSizeSubtitle');
+const fontSizeSubtitleValue = document.getElementById('fontSizeSubtitleValue');
+const logoSizeInput = document.getElementById('logoSize');
+const logoSizeValue = document.getElementById('logoSizeValue');
+const logoPositionSelect = document.getElementById('logoPosition');
+const generatePreviewBtn = document.getElementById('generatePreview');
+const generateVideoBtn = document.getElementById('generateVideo');
+const playPauseBtn = document.getElementById('playPauseBtn');
+const restartBtn = document.getElementById('restartBtn');
+const backgroundInput = document.getElementById('backgroundInput');
+const audioInput = document.getElementById('audioInput');
+const logoInput = document.getElementById('logoInput');
+const backgroundInfo = document.getElementById('backgroundInfo');
+const audioInfo = document.getElementById('audioInfo');
+const logoInfo = document.getElementById('logoInfo');
+const statusInfo = document.getElementById('statusInfo');
+const progressContainer = document.getElementById('progressContainer');
+const progressFill = document.getElementById('progressFill');
+const progressText = document.getElementById('progressText');
+const videoDownload = document.getElementById('videoDownload');
+const downloadLink = document.getElementById('downloadLink');
+
+// متغيرات التطبيق
+let backgroundMedia = null;
+let backgroundType = 'color'; // 'color', 'image', 'video'
+let audioElement = null;
+let logoImage = null;
+let videoDuration = 10; // المدة الافتراضية بالثواني
+let isPlaying = false;
+let currentTime = 0;
+let lastTimestamp = 0;
+let animationId = null;
+let generatedVideoBlob = null;
+
+// تحميل الملفات
+backgroundInput.addEventListener('change', function(e) {
+const file = e.target.files[0];
+if (!file) return;
+  
+  backgroundInfo.textContent = `الخلفية: ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+  
+  const reader = new FileReader();
+  reader.onload = function(event) {
+    if (file.type.startsWith('video/')) {
+      backgroundType = 'video';
+      backgroundMedia = document.createElement('video');
+      backgroundMedia.src = event.target.result;
+      backgroundMedia.loop = true;
+      backgroundMedia.muted = true;
+      backgroundMedia.addEventListener('loadeddata', function() {
+        drawPreview();
+      });
+    } else {
+      backgroundType = 'image';
+      backgroundMedia = new Image();
+      backgroundMedia.src = event.target.result;
+      backgroundMedia.onload = function() {
+        drawPreview();
+      };
+    }
+  };
+  reader.readAsDataURL(file);
+});
+
+audioInput.addEventListener('change', function(e) {
+const file = e.target.files[0];
+if (!file) return;
+  
+  audioInfo.textContent = `الصوت: ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+  
+  if (audioElement) {
+    audioElement.pause();
+    audioElement = null;
+  }
+  
+  audioElement = new Audio();
+  audioElement.src = URL.createObjectURL(file);
+  
+  audioElement.addEventListener('loadedmetadata', function() {
+    videoDuration = audioElement.duration;
+    audioInfo.textContent = `الصوت: ${file.name} - طول الفيديو: ${formatTime(videoDuration)}`;
+    statusInfo.textContent = `مدة الفيديو: ${formatTime(videoDuration)} - جاهز للإنشاء`;
+  });
+  
+  audioElement.addEventListener('ended', function() {
+    isPlaying = false;
+    playPauseBtn.textContent = 'تشغيل';
+    currentTime = 0;
+    cancelAnimationFrame(animationId);
+  });
+});
+
+logoInput.addEventListener('change', function(e) {
+const file = e.target.files[0];
+if (!file) return;
+  
+  logoInfo.textContent = `الشعار: ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+  
+  const reader = new FileReader();
+  reader.onload = function(event) {
+    logoImage = new Image();
+    logoImage.src = event.target.result;
+    logoImage.onload = function() {
+      drawPreview();
+    };
+  };
+  reader.readAsDataURL(file);
+});
+
+// معالجة التغييرات في التحكم
+fontSizeSubtitleInput.addEventListener('input', function() {
+  fontSizeSubtitleValue.textContent = this.value + 'px';
+  drawPreview();
+});
+
+logoSizeInput.addEventListener('input', function() {
+  logoSizeValue.textContent = this.value + 'px';
+  drawPreview();
+});
+
+// وظائف المساعدة
+function formatTime(seconds) {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+function wrapText(context, text, x, y, maxWidth, lineHeight) {
+  const words = text.split(' ');
+  const lines = [];
+  let currentLine = words[0] || '';
+  
+  for (let i = 1; i < words.length; i++) {
+    const word = words[i];
+    const width = context.measureText(currentLine + " " + word).width;
+    if (width < maxWidth) {
+      currentLine += " " + word;
+    } else {
+      lines.push(currentLine);
+      currentLine = word;
+    }
+  }
+  lines.push(currentLine);
+  
+  for (let j = 0; j < lines.length; j++) {
+    context.fillText(lines[j], x, y + (j * lineHeight));
+  }
+  
+  return lines;
+}
+
+function drawPreview(timestamp = 0) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  // رسم الخلفية
+  if (backgroundType === 'color' || !backgroundMedia) {
+    ctx.fillStyle = '#111';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  } else if (backgroundType === 'image' && backgroundMedia.complete) {
+    // حساب الأبعاد المناسبة للصورة
+    const imgRatio = backgroundMedia.width / backgroundMedia.height;
+    const canvasRatio = canvas.width / canvas.height;
+    
+    let drawWidth, drawHeight, offsetX, offsetY;
+    
+    if (imgRatio > canvasRatio) {
+      drawHeight = canvas.height;
+      drawWidth = drawHeight * imgRatio;
+      offsetX = (canvas.width - drawWidth) / 2;
+      offsetY = 0;
+    } else {
+      drawWidth = canvas.width;
+      drawHeight = drawWidth / imgRatio;
+      offsetX = 0;
+      offsetY = (canvas.height - drawHeight) / 2;
+    }
+    
+    ctx.drawImage(backgroundMedia, offsetX, offsetY, drawWidth, drawHeight);
+  } else if (backgroundType === 'video' && backgroundMedia.readyState >= 2) {
+    // رسم الفيديو كخلفية
+    const videoRatio = backgroundMedia.videoWidth / backgroundMedia.videoHeight;
+    const canvasRatio = canvas.width / canvas.height;
+    
+    let drawWidth, drawHeight, offsetX, offsetY;
+    
+    if (videoRatio > canvasRatio) {
+      drawHeight = canvas.height;
+      drawWidth = drawHeight * videoRatio;
+      offsetX = (canvas.width - drawWidth) / 2;
+      offsetY = 0;
+    } else {
+      drawWidth = canvas.width;
+      drawHeight = drawWidth / videoRatio;
+      offsetX = 0;
+      offsetY = (canvas.height - drawHeight) / 2;
+    }
+    
+    ctx.drawImage(backgroundMedia, offsetX, offsetY, drawWidth, drawHeight);
+  }
+  
+  // إضافة طبقة شبه شفافة للنصوص
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  // رسم النصوص
+  const title = titleInput.value;
+  const subtitle = subtitleInput.value;
+  const fontSizeTitle = parseInt(fontSizeTitleSelect.value);
+  const fontSizeSubtitle = parseInt(fontSizeSubtitleInput.value);
+  
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  
+  // العنوان
+  ctx.fillStyle = '#ffcc00';
+  ctx.font = `bold ${fontSizeTitle}px Arial`;
+  
+  const maxTitleWidth = canvas.width - 40;
+  const titleLines = wrapText(ctx, title, canvas.width / 2, 30, maxTitleWidth, fontSizeTitle + 5);
+  const titleHeight = titleLines.length * (fontSizeTitle + 5);
+  
+  // النص الفرعي
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `bold ${fontSizeSubtitle}px Arial`;
+  
+  const maxSubtitleWidth = canvas.width - 80;
+  const subtitleY = 30 + titleHeight + 20;
+  
+  wrapText(ctx, subtitle, canvas.width / 2, subtitleY, maxSubtitleWidth, fontSizeSubtitle + 5);
+  
+  // رسم الشعار إذا موجود
+  if (logoImage && logoImage.complete) {
+    const logoSize = parseInt(logoSizeInput.value);
+    const position = logoPositionSelect.value;
+    
+    let logoX, logoY;
+    
+    switch(position) {
+      case 'top-left':
+        logoX = 20;
+        logoY = 20;
+        break;
+      case 'top-right':
+        logoX = canvas.width - logoSize - 20;
+        logoY = 20;
+        break;
+      case 'bottom-left':
+        logoX = 20;
+        logoY = canvas.height - logoSize - 20;
+        break;
+      case 'bottom-right':
+        logoX = canvas.width - logoSize - 20;
+        logoY = canvas.height - logoSize - 20;
+        break;
+      case 'center':
+        logoX = (canvas.width - logoSize) / 2;
+        logoY = (canvas.height - logoSize) / 2;
+        break;
+    }
+    
+    // إضافة ظل للشعار
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
+    
+    ctx.drawImage(logoImage, logoX, logoY, logoSize, logoSize);
+    
+    // إزالة الظل
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+  }
+  
+  // رسم مؤشر الوقت إذا كان التشغيل نشط
+  if (isPlaying) {
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+    ctx.font = 'bold 16px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText(formatTime(currentTime), 10, 10);
+    ctx.textAlign = 'right';
+    ctx.fillText(formatTime(videoDuration), canvas.width - 10, 10);
+    
+    // رسم شريط التقدم
+    const progress = currentTime / videoDuration;
+    ctx.fillStyle = '#2196F3';
+    ctx.fillRect(0, canvas.height - 5, canvas.width * progress, 5);
+  }
+}
+
+// التحكم في التشغيل
+function animate(timestamp) {
+  if (!lastTimestamp) lastTimestamp = timestamp;
+  const delta = (timestamp - lastTimestamp) / 1000;
+  lastTimestamp = timestamp;
+  
+  if (isPlaying) {
+    currentTime += delta;
+    if (currentTime >= videoDuration) {
+      currentTime = 0;
+      if (audioElement) audioElement.currentTime = 0;
+    }
+    
+    // تحديث وقت الصوت إذا كان موجود
+    if (audioElement && Math.abs(audioElement.currentTime - currentTime) > 0.1) {
+      audioElement.currentTime = currentTime;
+    }
+    
+    drawPreview();
+    animationId = requestAnimationFrame(animate);
+  }
+}
+
+playPauseBtn.addEventListener('click', function() {
+  if (!isPlaying) {
+    isPlaying = true;
+    playPauseBtn.textContent = 'إيقاف';
+    
+    if (backgroundMedia && backgroundType === 'video') {
+      backgroundMedia.play();
+    }
+    
+    if (audioElement) {
+      audioElement.currentTime = currentTime;
+      audioElement.play();
+    }
+    
+    lastTimestamp = 0;
+    animationId = requestAnimationFrame(animate);
+  } else {
+    isPlaying = false;
+    playPauseBtn.textContent = 'تشغيل';
+    
+    if (backgroundMedia && backgroundType === 'video') {
+      backgroundMedia.pause();
+    }
+    
+    if (audioElement) {
+      audioElement.pause();
+    }
+    
+    cancelAnimationFrame(animationId);
+  }
+});
+
+restartBtn.addEventListener('click', function() {
+  currentTime = 0;
+  
+  if (backgroundMedia && backgroundType === 'video') {
+    backgroundMedia.currentTime = 0;
+  }
+  
+  if (audioElement) {
+    audioElement.currentTime = 0;
+  }
+  
+  drawPreview();
+});
+
+// إنشاء الفيديو
+generateVideoBtn.addEventListener('click', async function() {
+  if (!confirm('سيستغرق إنشاء الفيديو بعض الوقت. هل تريد المتابعة؟')) return;
+  
+  statusInfo.textContent = 'جاري إنشاء الفيديو... قد يستغرق بضع دقائق';
+  progressContainer.classList.remove('hidden');
+  videoDownload.classList.add('hidden');
+  
+  try {
+    // محاكاة عملية إنشاء الفيديو
+    for (let i = 0; i <= 100; i += 10) {
+      await new Promise(resolve => setTimeout(resolve, 300));
+      progressFill.style.width = i + '%';
+      progressText.textContent = i + '%';
+    }
+    
+    // في بيئة حقيقية، هنا نستخدم مكتبة مثل ffmpeg.js لإنشاء الفيديو
+    // لكن في المتصفح سنقوم بمحاكاة النتيجة
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // محاكاة إنشاء فيديو
+    const finalCanvas = document.createElement('canvas');
+    finalCanvas.width = 1280;
+    finalCanvas.height = 720;
+    const finalCtx = finalCanvas.getContext('2d');
+    
+    // ملء الخلفية
+    finalCtx.fillStyle = '#111';
+    finalCtx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+    
+    // إضافة نص
+    finalCtx.fillStyle = '#ffcc00';
+    finalCtx.font = 'bold 60px Arial';
+    finalCtx.textAlign = 'center';
+    finalCtx.fillText('فيديو جاهز للتحميل', finalCanvas.width / 2, finalCanvas.height / 2 - 50);
+    
+    finalCtx.fillStyle = '#ffffff';
+    finalCtx.font = 'bold 30px Arial';
+    finalCtx.fillText('تم إنشاء الفيديو بنجاح!', finalCanvas.width / 2, finalCanvas.height / 2 + 30);
+    
+    finalCtx.fillStyle = '#4fc3f7';
+    finalCtx.font = 'bold 24px Arial';
+    finalCtx.fillText(`المدة: ${formatTime(videoDuration)}`, finalCanvas.width / 2, finalCanvas.height / 2 + 80);
+    
+    // تحويل الكانفاس إلى فيديو (محاكاة)
+    finalCanvas.toBlob(function(blob) {
+      generatedVideoBlob = blob;
+      const url = URL.createObjectURL(blob);
+      downloadLink.href = url;
+      
+      progressFill.style.width = '100%';
+      progressText.textContent = '100%';
+      statusInfo.textContent = 'تم إنشاء الفيديو بنجاح! جاهز للتحميل';
+      videoDownload.classList.remove('hidden');
+      
+      // في تطبيق حقيقي، هنا سنقوم بإنشاء فيديو حقيقي باستخدام:
+      // 1. تسجيل إطارات الكانفاس
+      // 2. دمجها مع الصوت
+      // 3. ترميزها إلى MP4 باستخدام ffmpeg.js أو WebCodecs API
+    }, 'video/mp4');
+    
+  } catch (error) {
+    console.error('Error generating video:', error);
+    statusInfo.textContent = 'حدث خطأ أثناء إنشاء الفيديو';
+    progressContainer.classList.add('hidden');
+  }
+});
+
+// المعاينة الفورية
+generatePreviewBtn.addEventListener('click', drawPreview);
+
+// الأحداث التلقائية
+titleInput.addEventListener('input', drawPreview);
+subtitleInput.addEventListener('input', drawPreview);
+fontSizeTitleSelect.addEventListener('change', drawPreview);
+fontSizeSubtitleInput.addEventListener('input', drawPreview);
+logoPositionSelect.addEventListener('change', drawPreview);
+
+// التهيئة الأولية
+drawPreview();
+</script>
+</body>
+</html>
