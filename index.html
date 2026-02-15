@@ -623,8 +623,6 @@ generateVideoBtn.addEventListener('click', async function() {
     sourceNode = audioContext.createMediaElementSource(audioElement);
     destinationStream = audioContext.createMediaStreamDestination();
     sourceNode.connect(destinationStream);
-    sourceNode.connect(audioContext.destination); // للاستماع أثناء التسجيل (اختياري)
-
     // 3. دمج تيار الصوت والفيديو
     const tracks = [...canvasStream.getVideoTracks(), ...destinationStream.stream.getAudioTracks()];
     const combinedStream = new MediaStream(tracks);
