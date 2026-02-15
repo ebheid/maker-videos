@@ -4,7 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>منشئ الفيديوهات المتقدم</title>
+<!-- إضافة خطوط جوجل العربية -->
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Tajawal:wght@400;700&family=Almarai:wght@400;700&family=Reem+Kufi&family=Lalezar&family=Changa:wght@400;700&family=El+Messiri:wght@400;700&family=Harmattan:wght@400;700&family=Jomhuria&family=Katibeh&family=Lateef&family=Mirza:wght@400;700&family=Rakkas&family=Scheherazade&family=Thabit&family=Amiri:wght@400;700&family=Droid+Arabic+Kufi&family=Droid+Arabic+Naskh&family=Noto+Naskh+Arabic:wght@400;700&family=Markazi+Text:wght@400;700&display=swap" rel="stylesheet">
 <style>
+/* الأنماط كما هي مع إضافة تنسيق بسيط */
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif}
 body{background:linear-gradient(135deg,#1a2a6c,#b21f1f,#fdbb2d);color:#fff;min-height:100vh;padding:20px;direction:rtl}
 .container{max-width:1200px;margin:0 auto}
@@ -68,6 +71,33 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;hei
 <div class="form-group">
 <label for="subtitle">النص الرئيسي</label>
 <textarea id="subtitle">هذا التصميم ظهر في منتصف الفيديو</textarea>
+</div>
+
+<!-- اختيار الخط العربي -->
+<div class="form-group">
+<label for="arabicFont">نوع الخط العربي</label>
+<select id="arabicFont">
+  <option value="Cairo">القاهرة (Cairo)</option>
+  <option value="Tajawal">تاجوال (Tajawal)</option>
+  <option value="Almarai">المراعي (Almarai)</option>
+  <option value="Reem Kufi">ريم كوفي (Reem Kufi)</option>
+  <option value="Lalezar">لالعازر (Lalezar)</option>
+  <option value="Changa">تشانغا (Changa)</option>
+  <option value="El Messiri">المصيري (El Messiri)</option>
+  <option value="Harmattan">هرمطان (Harmattan)</option>
+  <option value="Jomhuria">الجمهورية (Jomhuria)</option>
+  <option value="Katibeh">الكاتبة (Katibeh)</option>
+  <option value="Lateef">لطيف (Lateef)</option>
+  <option value="Mirza">ميرزا (Mirza)</option>
+  <option value="Rakkas">رقاص (Rakkas)</option>
+  <option value="Scheherazade">شهرزاد (Scheherazade)</option>
+  <option value="Thabit">ثابت (Thabit)</option>
+  <option value="Amiri">أميري (Amiri)</option>
+  <option value="Droid Arabic Kufi">درويد عربي كوفي</option>
+  <option value="Droid Arabic Naskh">درويد عربي نَسخ</option>
+  <option value="Noto Naskh Arabic">نوتو نَسخ عربي</option>
+  <option value="Markazi Text">مركازي (Markazi Text)</option>
+</select>
 </div>
 
 <div class="form-group">
@@ -180,6 +210,7 @@ const fontSizeSubtitleValue = document.getElementById('fontSizeSubtitleValue');
 const logoSizeInput = document.getElementById('logoSize');
 const logoSizeValue = document.getElementById('logoSizeValue');
 const logoPositionSelect = document.getElementById('logoPosition');
+const arabicFontSelect = document.getElementById('arabicFont');
 const generatePreviewBtn = document.getElementById('generatePreview');
 const generateVideoBtn = document.getElementById('generateVideo');
 const playPauseBtn = document.getElementById('playPauseBtn');
@@ -225,6 +256,7 @@ if (!file) return;
       backgroundMedia.loop = true;
       backgroundMedia.muted = true;
       backgroundMedia.addEventListener('loadeddata', function() {
+        currentTime = 0;
         drawPreview();
       });
     } else {
@@ -294,6 +326,8 @@ logoSizeInput.addEventListener('input', function() {
   logoSizeValue.textContent = this.value + 'px';
   drawPreview();
 });
+
+arabicFontSelect.addEventListener('change', drawPreview);
 
 // وظائف المساعدة
 function formatTime(seconds) {
@@ -384,13 +418,14 @@ function drawPreview(timestamp = 0) {
   const subtitle = subtitleInput.value;
   const fontSizeTitle = parseInt(fontSizeTitleSelect.value);
   const fontSizeSubtitle = parseInt(fontSizeSubtitleInput.value);
+  const selectedFont = arabicFontSelect.value;
   
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
   
   // العنوان
   ctx.fillStyle = '#ffcc00';
-  ctx.font = `bold ${fontSizeTitle}px Arial`;
+  ctx.font = `bold ${fontSizeTitle}px '${selectedFont}', Arial, sans-serif`;
   
   const maxTitleWidth = canvas.width - 40;
   const titleLines = wrapText(ctx, title, canvas.width / 2, 30, maxTitleWidth, fontSizeTitle + 5);
@@ -398,7 +433,7 @@ function drawPreview(timestamp = 0) {
   
   // النص الفرعي
   ctx.fillStyle = '#ffffff';
-  ctx.font = `bold ${fontSizeSubtitle}px Arial`;
+  ctx.font = `bold ${fontSizeSubtitle}px '${selectedFont}', Arial, sans-serif`;
   
   const maxSubtitleWidth = canvas.width - 80;
   const subtitleY = 30 + titleHeight + 20;
@@ -484,6 +519,11 @@ function animate(timestamp) {
       audioElement.currentTime = currentTime;
     }
     
+    // تحديث وقت الفيديو الخلفي إذا كان موجودًا ونوعه فيديو
+    if (backgroundMedia && backgroundType === 'video') {
+      backgroundMedia.currentTime = currentTime;
+    }
+    
     drawPreview();
     animationId = requestAnimationFrame(animate);
   }
@@ -495,7 +535,8 @@ playPauseBtn.addEventListener('click', function() {
     playPauseBtn.textContent = 'إيقاف';
     
     if (backgroundMedia && backgroundType === 'video') {
-      backgroundMedia.play();
+      backgroundMedia.pause();
+      backgroundMedia.currentTime = currentTime;
     }
     
     if (audioElement) {
@@ -535,71 +576,167 @@ restartBtn.addEventListener('click', function() {
   drawPreview();
 });
 
-// إنشاء الفيديو
+// إنشاء الفيديو - جودة عالية + صيغة MP4 إن أمكن
 generateVideoBtn.addEventListener('click', async function() {
-  if (!confirm('سيستغرق إنشاء الفيديو بعض الوقت. هل تريد المتابعة؟')) return;
+  // التحقق من وجود الصوت
+  if (!audioElement) {
+    alert('الرجاء تحميل مقطع صوتي أولاً.');
+    return;
+  }
+
+  if (!confirm('سيستغرق إنشاء الفيديو بعض الوقت (مدة الفيديو الفعلية). هل تريد المتابعة؟')) return;
   
   statusInfo.textContent = 'جاري إنشاء الفيديو... قد يستغرق بضع دقائق';
   progressContainer.classList.remove('hidden');
   videoDownload.classList.add('hidden');
   
+  // تعطيل الأزرار مؤقتاً
+  generateVideoBtn.disabled = true;
+  playPauseBtn.disabled = true;
+  restartBtn.disabled = true;
+
+  // إعداد متغيرات التسجيل
+  let mediaRecorder;
+  let recordedChunks = [];
+  let recordingAnimationId;
+  let audioContext;
+  let sourceNode;
+  let destinationStream;
+
   try {
-    // محاكاة عملية إنشاء الفيديو
-    for (let i = 0; i <= 100; i += 10) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      progressFill.style.width = i + '%';
-      progressText.textContent = i + '%';
+    // التأكد من أن الصوت جاهز للتشغيل
+    if (audioElement.readyState < 2) { // HAVE_CURRENT_DATA على الأقل
+      await new Promise(resolve => {
+        audioElement.addEventListener('canplaythrough', resolve, { once: true });
+      });
+    }
+
+    // 1. إنشاء تيار من الكانفاس (30 إطار في الثانية)
+    const canvasStream = canvas.captureStream(30);
+
+    // 2. إعداد الصوت عبر AudioContext
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioContext.state === 'suspended') {
+      await audioContext.resume();
     }
     
-    // في بيئة حقيقية، هنا نستخدم مكتبة مثل ffmpeg.js لإنشاء الفيديو
-    // لكن في المتصفح سنقوم بمحاكاة النتيجة
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    sourceNode = audioContext.createMediaElementSource(audioElement);
+    destinationStream = audioContext.createMediaStreamDestination();
+    sourceNode.connect(destinationStream);
+    sourceNode.connect(audioContext.destination); // للاستماع أثناء التسجيل (اختياري)
+
+    // 3. دمج تيار الصوت والفيديو
+    const tracks = [...canvasStream.getVideoTracks(), ...destinationStream.stream.getAudioTracks()];
+    const combinedStream = new MediaStream(tracks);
+
+    // 4. تحديد أفضل صيغة وجودة
+    let mimeType;
+    let fileExtension = 'mp4';
     
-    // محاكاة إنشاء فيديو
-    const finalCanvas = document.createElement('canvas');
-    finalCanvas.width = 1280;
-    finalCanvas.height = 720;
-    const finalCtx = finalCanvas.getContext('2d');
-    
-    // ملء الخلفية
-    finalCtx.fillStyle = '#111';
-    finalCtx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
-    
-    // إضافة نص
-    finalCtx.fillStyle = '#ffcc00';
-    finalCtx.font = 'bold 60px Arial';
-    finalCtx.textAlign = 'center';
-    finalCtx.fillText('فيديو جاهز للتحميل', finalCanvas.width / 2, finalCanvas.height / 2 - 50);
-    
-    finalCtx.fillStyle = '#ffffff';
-    finalCtx.font = 'bold 30px Arial';
-    finalCtx.fillText('تم إنشاء الفيديو بنجاح!', finalCanvas.width / 2, finalCanvas.height / 2 + 30);
-    
-    finalCtx.fillStyle = '#4fc3f7';
-    finalCtx.font = 'bold 24px Arial';
-    finalCtx.fillText(`المدة: ${formatTime(videoDuration)}`, finalCanvas.width / 2, finalCanvas.height / 2 + 80);
-    
-    // تحويل الكانفاس إلى فيديو (محاكاة)
-    finalCanvas.toBlob(function(blob) {
-      generatedVideoBlob = blob;
+    // محاولة استخدام MP4 مع H.264 و AAC
+    if (MediaRecorder.isTypeSupported('video/mp4; codecs="avc1.42E01E, mp4a.40.2"')) {
+      mimeType = 'video/mp4; codecs="avc1.42E01E, mp4a.40.2"';
+      statusInfo.textContent = 'جاري إنشاء الفيديو (MP4 عالي الجودة)...';
+    } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')) {
+      mimeType = 'video/webm;codecs=vp9,opus';
+      fileExtension = 'webm'; // سنستخدم mp4 كامتداد لكن التنسيق webm
+      statusInfo.textContent = 'جاري إنشاء الفيديو (WebM عالي الجودة)...';
+    } else {
+      mimeType = 'video/webm';
+      fileExtension = 'webm';
+      statusInfo.textContent = 'جاري إنشاء الفيديو (WebM)...';
+    }
+
+    // خيارات الجودة العالية
+    const options = {
+      mimeType: mimeType,
+      videoBitsPerSecond: 8000000, // 8 Mbps
+      audioBitsPerSecond: 256000    // 256 kbps
+    };
+
+    mediaRecorder = new MediaRecorder(combinedStream, options);
+
+    mediaRecorder.ondataavailable = (event) => {
+      if (event.data.size > 0) recordedChunks.push(event.data);
+    };
+
+    mediaRecorder.onstop = () => {
+      // إنشاء blob وتحميله
+      const blob = new Blob(recordedChunks, { type: mimeType.split(';')[0] }); // استخدام نوع MIME الأساسي
       const url = URL.createObjectURL(blob);
       downloadLink.href = url;
+      downloadLink.download = `video.${fileExtension}`; // الحفاظ على الامتداد الصحيح
       
       progressFill.style.width = '100%';
       progressText.textContent = '100%';
       statusInfo.textContent = 'تم إنشاء الفيديو بنجاح! جاهز للتحميل';
       videoDownload.classList.remove('hidden');
       
-      // في تطبيق حقيقي، هنا سنقوم بإنشاء فيديو حقيقي باستخدام:
-      // 1. تسجيل إطارات الكانفاس
-      // 2. دمجها مع الصوت
-      // 3. ترميزها إلى MP4 باستخدام ffmpeg.js أو WebCodecs API
-    }, 'video/mp4');
+      // إعادة تمكين الأزرار
+      generateVideoBtn.disabled = false;
+      playPauseBtn.disabled = false;
+      restartBtn.disabled = false;
+      
+      // تنظيف
+      if (audioContext) audioContext.close();
+    };
+
+    // بدء التسجيل
+    recordedChunks = [];
+    mediaRecorder.start(1000); // إصدار قطع كل ثانية لتحديث التقدم
+    
+    // بدء تشغيل الصوت من البداية
+    audioElement.currentTime = 0;
+    await audioElement.play();
+    
+    // بدء حلقة تحديث الكانفاس للتسجيل
+    const recordingStartTime = performance.now() / 1000;
+
+    function updateForRecording() {
+      const now = performance.now() / 1000;
+      const elapsed = now - recordingStartTime;
+      
+      if (elapsed >= videoDuration) {
+        // انتهى الوقت
+        mediaRecorder.stop();
+        audioElement.pause();
+        audioElement.currentTime = 0;
+        cancelAnimationFrame(recordingAnimationId);
+        return;
+      }
+      
+      // تحديث currentTime لمزامنة الرسم
+      currentTime = elapsed;
+      
+      // تحديث الفيديو الخلفي إذا كان موجوداً
+      if (backgroundMedia && backgroundType === 'video') {
+        backgroundMedia.currentTime = currentTime;
+      }
+      
+      // رسم الإطار الحالي
+      drawPreview();
+      
+      // تحديث شريط التقدم
+      const progress = (elapsed / videoDuration) * 100;
+      progressFill.style.width = progress + '%';
+      progressText.textContent = Math.round(progress) + '%';
+      
+      recordingAnimationId = requestAnimationFrame(updateForRecording);
+    }
+    
+    recordingAnimationId = requestAnimationFrame(updateForRecording);
     
   } catch (error) {
-    console.error('Error generating video:', error);
-    statusInfo.textContent = 'حدث خطأ أثناء إنشاء الفيديو';
+    console.error('Error during recording:', error);
+    statusInfo.textContent = 'حدث خطأ أثناء إنشاء الفيديو: ' + error.message;
     progressContainer.classList.add('hidden');
+    
+    // إعادة تمكين الأزرار
+    generateVideoBtn.disabled = false;
+    playPauseBtn.disabled = false;
+    restartBtn.disabled = false;
+    
+    if (audioContext) audioContext.close();
   }
 });
 
